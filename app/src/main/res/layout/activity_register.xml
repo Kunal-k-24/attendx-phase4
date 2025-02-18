@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#121212"
+    android:padding="20dp">
+
+    <EditText
+        android:id="@+id/editTextName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColorHint="#BB86FC"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:hint="Full Name" />
+
+    <EditText
+        android:id="@+id/editTextEnrollment"
+        android:layout_width="match_parent"
+        android:textColorHint="#BB86FC"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:hint="Enrollment Number" />
+
+    <EditText
+        android:id="@+id/editTextCollegeEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColorHint="#BB86FC"
+        android:textColor="@color/white"
+        android:gravity="center"
+        android:hint="College Email" />
+
+    <EditText
+        android:id="@+id/editTextRollNo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textColorHint="#BB86FC"
+        android:hint="Roll Number" />
+
+    <EditText
+        android:id="@+id/editTextPersonalEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textColorHint="#BB86FC"
+        android:hint="Personal Email" />
+
+    <EditText
+        android:id="@+id/editTextPassword"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:textColorHint="#BB86FC"
+        android:textColor="@color/white"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:inputType="textPassword" />
+
+    <Button
+        android:id="@+id/buttonRegister"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:textColorHint="#BB86FC"
+        android:layout_height="wrap_content"
+        android:text="Register" />
+
+</LinearLayout>
