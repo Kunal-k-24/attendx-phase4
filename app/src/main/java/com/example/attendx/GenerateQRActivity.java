@@ -59,7 +59,7 @@ public class GenerateQRActivity extends AppCompatActivity {
         // Button Click Listeners
         btnAddTimeSlot.setOnClickListener(v -> {
             if (timeSlotSpinners.size() < 2) addTimeSlotDropdown();
-            else Toast.makeText(this, "Maximum 2 time slots allowed", Toast.LENGTH_SHORT).show();
+            else Toast.makeText(this, "Only 1 additional time slot allowed", Toast.LENGTH_SHORT).show();
         });
 
         btnRemoveTimeSlot.setOnClickListener(v -> {
@@ -117,15 +117,58 @@ public class GenerateQRActivity extends AppCompatActivity {
         }
     }
 
-
     private void addTimeSlotDropdown() {
         Spinner timeSlotSpinner = new Spinner(this);
-        timeSlotSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, TIME_SLOTS));
+
+        if (timeSlotSpinners.isEmpty()) {
+            // First dropdown: Show all available time slots
+            timeSlotSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, TIME_SLOTS));
+            timeSlotSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+                @Override
+                public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
+                    if (timeSlotSpinners.size() == 2) {
+                        updateSecondTimeSlot();
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+            });
+        } else {
+            // Second dropdown: ONLY 1-hour slot after first selection
+            Spinner firstSpinner = timeSlotSpinners.get(0);
+            String firstSelectedTimeSlot = firstSpinner.getSelectedItem().toString();
+            List<String> filteredSlots = getNextOneHourSlot(firstSelectedTimeSlot);
+
+            timeSlotSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, filteredSlots));
+        }
 
         timeSlotContainer.addView(timeSlotSpinner);
         timeSlotSpinners.add(timeSlotSpinner);
 
         btnRemoveTimeSlot.setVisibility(timeSlotSpinners.size() > 1 ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateSecondTimeSlot() {
+        if (timeSlotSpinners.size() < 2) return;
+
+        Spinner firstSpinner = timeSlotSpinners.get(0);
+        Spinner secondSpinner = timeSlotSpinners.get(1);
+        String firstSelectedTimeSlot = firstSpinner.getSelectedItem().toString();
+        List<String> filteredSlots = getNextOneHourSlot(firstSelectedTimeSlot);
+
+        secondSpinner.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, filteredSlots));
+    }
+
+    private List<String> getNextOneHourSlot(String selectedTimeSlot) {
+        List<String> validSlot = new ArrayList<>();
+        for (int i = 0; i < TIME_SLOTS.length - 1; i++) {
+            if (TIME_SLOTS[i].equals(selectedTimeSlot)) {
+                validSlot.add(TIME_SLOTS[i + 1]); // Only add the next one-hour slot
+                break;
+            }
+        }
+        return validSlot.isEmpty() ? List.of("No available slot") : validSlot;
     }
 
     private void removeTimeSlot() {
