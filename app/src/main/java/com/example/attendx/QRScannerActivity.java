@@ -19,7 +19,7 @@ public class QRScannerActivity extends AppCompatActivity implements ZXingScanner
     private ZXingScannerView scannerView;
     private DatabaseReference usersRef, attendanceRef;
     private String userId, studentName, enrollmentNo;
-    private boolean isStudentDataLoaded = false; // ✅ Ensures data is fetched before scanning
+    private boolean isStudentDataLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +30,7 @@ public class QRScannerActivity extends AppCompatActivity implements ZXingScanner
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         usersRef = FirebaseDatabase.getInstance().getReference("Users").child(userId);
 
-        // ✅ Fetch student details before allowing scanning
+        // ✅ Fetch student data automatically when entering
         fetchStudentData();
     }
 
@@ -40,21 +40,20 @@ public class QRScannerActivity extends AppCompatActivity implements ZXingScanner
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
                     studentName = snapshot.child("name").getValue(String.class);
-                    enrollmentNo = snapshot.child("enrollment").getValue(String.class);  // ✅ FIXED (changed to "enrollment")
+                    enrollmentNo = snapshot.child("enrollment").getValue(String.class);
 
                     Log.d("FirebaseDebug", "Fetched Name: " + studentName + ", Enrollment: " + enrollmentNo);
 
                     if (studentName != null && enrollmentNo != null) {
-                        isStudentDataLoaded = true; // ✅ Mark as loaded
-                        Toast.makeText(QRScannerActivity.this, "Student Found: " + studentName, Toast.LENGTH_SHORT).show();
+                        isStudentDataLoaded = true;
                     } else {
                         Toast.makeText(QRScannerActivity.this, "Error: Student data incomplete!", Toast.LENGTH_SHORT).show();
                         Log.e("FirebaseError", "Missing student data for userId: " + userId);
                         finish();
                     }
                 } else {
-                    Toast.makeText(QRScannerActivity.this, "Error: Student not found in Users!", Toast.LENGTH_SHORT).show();
-                    Log.e("FirebaseError", "UserId not found in Users: " + userId);
+                    Toast.makeText(QRScannerActivity.this, "Error: Student not found!", Toast.LENGTH_SHORT).show();
+                    Log.e("FirebaseError", "UserId not found: " + userId);
                     finish();
                 }
             }
@@ -96,7 +95,7 @@ public class QRScannerActivity extends AppCompatActivity implements ZXingScanner
             String timeSlot = qrData.getString("timeSlot");
             String sessionId = qrData.getString("sessionId");
 
-            // ✅ Save attendance in Firebase
+            // ✅ Check if attendance is already marked
             attendanceRef = FirebaseDatabase.getInstance().getReference("attendance")
                     .child(date)
                     .child(subject)
@@ -105,14 +104,30 @@ public class QRScannerActivity extends AppCompatActivity implements ZXingScanner
                     .child("students")
                     .child(userId);
 
-            HashMap<String, String> studentData = new HashMap<>();
-            studentData.put("name", studentName);
-            studentData.put("enrollment", enrollmentNo);  // ✅ FIXED (changed to "enrollment")
-            studentData.put("timestamp", new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date()));
+            attendanceRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // ✅ If already marked, show message and exit
+                        Toast.makeText(QRScannerActivity.this, "Attendance already marked!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // ✅ Mark attendance for the first time
+                        HashMap<String, Object> studentData = new HashMap<>();
+                        studentData.put("name", studentName);
+                        studentData.put("enrollment", enrollmentNo);
+                        studentData.put("timestamp", new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date()));
 
-            attendanceRef.setValue(studentData)
-                    .addOnSuccessListener(unused -> Toast.makeText(QRScannerActivity.this, "Attendance Marked Successfully!", Toast.LENGTH_SHORT).show())
-                    .addOnFailureListener(e -> Toast.makeText(QRScannerActivity.this, "Failed to mark attendance!", Toast.LENGTH_SHORT).show());
+                        attendanceRef.setValue(studentData)
+                                .addOnSuccessListener(unused -> Toast.makeText(QRScannerActivity.this, "Attendance Marked Successfully!", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e -> Toast.makeText(QRScannerActivity.this, "Failed to mark attendance!", Toast.LENGTH_SHORT).show());
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e("FirebaseError", "Database Error: " + error.getMessage());
+                }
+            });
 
         } catch (Exception e) {
             Toast.makeText(this, "Invalid QR Code", Toast.LENGTH_SHORT).show();
