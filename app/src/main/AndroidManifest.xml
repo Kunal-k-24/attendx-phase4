@@ -2,73 +2,64 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Required Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.CAMERA" /> <!-- 🔹 Fix for the Camera Warning -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AttendX"
         tools:targetApi="31">
-        <!-- 🔹 Launcher Activity (First screen of the app) -->
+
+        <!-- Splash Screen (Set as Launcher) -->
         <activity
-            android:name=".LoginSelectionActivity"
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".GetAttendanceActivity" /> <!-- ✅ Authentication Activities -->
+
+
+        <!-- Authentication Activities -->
+        <activity android:name=".LoginSelectionActivity" android:exported="true" />
+        <activity android:name=".LoginActivity" android:exported="true" />
+        <activity android:name=".RegisterActivity" android:exported="true" />
+        <activity android:name=".TeacherLoginActivity" android:exported="true" />
+
+        <!-- Dashboard Activities -->
+        <activity android:name=".TeacherDashboardActivity" android:exported="true" />
+        <activity android:name=".StudentDashboardActivity" android:exported="true" />
+
+        <!-- Attendance Activities -->
+        <activity android:name=".GenerateQRActivity" android:exported="true" />
+        <activity android:name=".MarkAttendanceActivity" android:exported="true" />
+        <activity android:name=".ViewAttendanceActivity" android:exported="true" />
+        <activity android:name=".AttendanceHistoryActivity" android:exported="true" />
+        <activity android:name=".AttendanceActivity" android:exported="true" />
+        <activity android:name=".SubmitAttendanceActivity" android:exported="true" />
+
+        <!-- QR Code Activities -->
         <activity android:name=".QRDisplayActivity" />
         <activity
             android:name=".QRScannerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-        <activity
-            android:name=".LoginActivity"
-            android:exported="true" />
-        <activity
-            android:name=".RegisterActivity"
-            android:exported="true" /> <!-- ✅ Dashboard Activities -->
-        <activity
-            android:name=".TeacherDashboardActivity"
-            android:exported="true" />
-        <activity
-            android:name=".StudentDashboardActivity"
-            android:exported="true" /> <!-- ✅ Teacher Login -->
-        <activity
-            android:name=".TeacherLoginActivity"
-            android:exported="true" /> <!-- ✅ Attendance Related Activities -->
-        <activity
-            android:name=".GenerateQRActivity"
-            android:exported="true" />
-        <activity
-            android:name=".MarkAttendanceActivity"
-            android:exported="true" />
-        <activity
-            android:name=".ViewAttendanceActivity"
-            android:exported="true" />
-        <activity
-            android:name=".AttendanceHistoryActivity"
-            android:exported="true" />
-        <activity
-            android:name=".AttendanceActivity"
-            android:exported="true" /> <!-- ✅ Splash Screen (if needed) -->
-        <activity
-            android:name=".SplashScreenActivity"
-            android:exported="true" />
-        <activity android:name=".SubmitAttendanceActivity"/>
+
+        <!-- Attendance Authentication -->
+        <activity android:name=".GetAttendanceActivity" />
 
     </application>
 
