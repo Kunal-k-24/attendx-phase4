@@ -5,7 +5,6 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- Select All Checkbox -->
     <CheckBox
         android:id="@+id/checkBoxSelectAll"
         android:layout_width="wrap_content"
@@ -14,7 +13,6 @@
         android:textSize="18sp"
         android:paddingBottom="10dp" />
 
-    <!-- Student ListView -->
     <ListView
         android:id="@+id/studentListView"
         android:layout_width="match_parent"
@@ -23,7 +21,6 @@
         android:divider="@android:color/darker_gray"
         android:dividerHeight="1dp" />
 
-    <!-- Add Student Button -->
     <Button
         android:id="@+id/btnAddStudent"
         android:layout_width="match_parent"
@@ -33,7 +30,6 @@
         android:padding="10dp"
         android:layout_marginTop="10dp" />
 
-    <!-- Submit Attendance Button -->
     <Button
         android:id="@+id/btnSubmitFinal"
         android:layout_width="match_parent"

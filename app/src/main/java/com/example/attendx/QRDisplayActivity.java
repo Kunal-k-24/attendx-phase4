@@ -3,20 +3,23 @@ package com.example.attendx;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.ImageView;
+import android.os.Handler;
+import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
+import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class QRDisplayActivity extends AppCompatActivity {
-
     private ImageView imageViewQR;
     private Button btnSubmitAttendance;
-    private String qrData, date, subject, lectureType, sessionId;
+    private String sessionId, date, subject, lectureType, timeSlot;
+    private Handler qrHandler = new Handler();
+    private boolean isActive = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,41 +29,66 @@ public class QRDisplayActivity extends AppCompatActivity {
         imageViewQR = findViewById(R.id.imageViewQR);
         btnSubmitAttendance = findViewById(R.id.btnSubmitAttendance);
 
-        // ✅ Get data from Intent
         Intent intent = getIntent();
-        qrData = intent.getStringExtra("qrData");
+        sessionId = intent.getStringExtra("sessionId");
         date = intent.getStringExtra("date");
         subject = intent.getStringExtra("subject");
         lectureType = intent.getStringExtra("lectureType");
-        sessionId = intent.getStringExtra("sessionId");
+        timeSlot = intent.getStringExtra("timeSlot");
 
-        if (qrData == null || sessionId == null || date == null || subject == null || lectureType == null) {
-            Log.e("QRDisplayActivity", "Missing necessary data!");
-            Toast.makeText(this, "Error: Missing data for QR generation!", Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
+        startQRRefresh();
 
-        generateQRCode(qrData);
-
-        btnSubmitAttendance.setOnClickListener(v -> {
-            Intent submitIntent = new Intent(QRDisplayActivity.this, SubmitAttendanceActivity.class);
-            submitIntent.putExtra("date", date);
-            submitIntent.putExtra("subject", subject);
-            submitIntent.putExtra("lectureType", lectureType);
-            submitIntent.putExtra("sessionId", sessionId);
-            startActivity(submitIntent);
+        btnSubmitAttendance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openSubmitAttendanceScreen();
+            }
         });
     }
 
-    private void generateQRCode(String data) {
+    private void startQRRefresh() {
+        qrHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (isActive) {
+                    updateQRCode();
+                    qrHandler.postDelayed(this, 5000);
+                }
+            }
+        });
+    }
+
+    private void updateQRCode() {
         try {
+            JSONObject qrJson = new JSONObject();
+            qrJson.put("sessionId", sessionId);
+            qrJson.put("subject", subject);
+            qrJson.put("lectureType", lectureType);
+            qrJson.put("timeSlot", timeSlot);
+            qrJson.put("date", date);
+            qrJson.put("token", System.currentTimeMillis());
+
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-            Bitmap qrBitmap = barcodeEncoder.encodeBitmap(data, BarcodeFormat.QR_CODE, 400, 400);
+            Bitmap qrBitmap = barcodeEncoder.encodeBitmap(qrJson.toString(), BarcodeFormat.QR_CODE, 400, 400);
             imageViewQR.setImageBitmap(qrBitmap);
-        } catch (WriterException e) {
-            Log.e("QRDisplayActivity", "Error generating QR Code", e);
-            Toast.makeText(this, "Failed to generate QR Code", Toast.LENGTH_SHORT).show();
+        } catch (WriterException | JSONException e) {
+            e.printStackTrace();
         }
+    }
+
+    private void openSubmitAttendanceScreen() {
+        Intent intent = new Intent(QRDisplayActivity.this, SubmitAttendanceActivity.class);
+        intent.putExtra("sessionId", sessionId);
+        intent.putExtra("date", date);
+        intent.putExtra("subject", subject);
+        intent.putExtra("lectureType", lectureType);
+        startActivity(intent);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isActive = false;
+        qrHandler.removeCallbacksAndMessages(null);
     }
 }

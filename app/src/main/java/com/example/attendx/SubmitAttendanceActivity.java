@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.*;
@@ -35,7 +34,6 @@ public class SubmitAttendanceActivity extends AppCompatActivity {
         addStudentButton = findViewById(R.id.btnAddStudent);
         selectAllCheckbox = findViewById(R.id.checkBoxSelectAll);
 
-        // ✅ Get data from Intent with null checks
         date = getIntent().getStringExtra("date");
         subject = getIntent().getStringExtra("subject");
         lectureType = getIntent().getStringExtra("lectureType");
@@ -47,7 +45,6 @@ public class SubmitAttendanceActivity extends AppCompatActivity {
             return;
         }
 
-        // ✅ Initialize Firebase reference
         attendanceRef = FirebaseDatabase.getInstance().getReference("attendance")
                 .child(date)
                 .child(subject)
@@ -55,13 +52,11 @@ public class SubmitAttendanceActivity extends AppCompatActivity {
                 .child(sessionId)
                 .child("students");
 
-        // ✅ Initialize adapter
         studentAdapter = new StudentAdapter(this, studentList);
         studentListView.setAdapter(studentAdapter);
 
         fetchScannedStudents();
 
-        // ✅ Select/Deselect all checkbox functionality
         selectAllCheckbox.setOnClickListener(v -> {
             boolean isChecked = selectAllCheckbox.isChecked();
             for (Student student : studentList) {
@@ -70,10 +65,7 @@ public class SubmitAttendanceActivity extends AppCompatActivity {
             studentAdapter.notifyDataSetChanged();
         });
 
-        // ✅ Submit attendance button
         submitButton.setOnClickListener(v -> submitFinalAttendance());
-
-        // ✅ Add student button
         addStudentButton.setOnClickListener(v -> showAddStudentDialog());
     }
 
@@ -85,7 +77,7 @@ public class SubmitAttendanceActivity extends AppCompatActivity {
                 for (DataSnapshot studentSnapshot : dataSnapshot.getChildren()) {
                     String studentId = studentSnapshot.getKey();
                     String studentName = studentSnapshot.child("name").getValue(String.class);
-                    String enrollmentNo = studentSnapshot.child("enrollment").getValue(String.class); // ✅ Fix: Use "enrollment"
+                    String enrollmentNo = studentSnapshot.child("enrollment").getValue(String.class);
 
                     if (studentId != null && studentName != null && enrollmentNo != null) {
                         studentList.add(new Student(studentId, studentName, enrollmentNo, true));
@@ -118,22 +110,18 @@ public class SubmitAttendanceActivity extends AppCompatActivity {
             }
         }
 
-        // ✅ Remove deselected students and update Firebase
         attendanceRef.setValue(finalAttendanceList)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(SubmitAttendanceActivity.this, "Attendance submitted successfully!", Toast.LENGTH_SHORT).show();
-
-                    // ✅ Redirect to Teacher Dashboard
                     Intent intent = new Intent(SubmitAttendanceActivity.this, TeacherDashboardActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-                    finish(); // ✅ Close current activity
+                    finish();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(SubmitAttendanceActivity.this, "Failed to submit attendance!", Toast.LENGTH_SHORT).show();
                 });
     }
-
 
     private void showAddStudentDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -156,13 +144,11 @@ public class SubmitAttendanceActivity extends AppCompatActivity {
                     return;
                 }
 
-                // Generate a unique ID for manually added students
                 String studentId = "manual_" + System.currentTimeMillis();
                 Student newStudent = new Student(studentId, name, enrollment, true);
                 studentList.add(newStudent);
                 studentAdapter.notifyDataSetChanged();
 
-                // ✅ Add student to Firebase
                 HashMap<String, String> studentData = new HashMap<>();
                 studentData.put("name", name);
                 studentData.put("enrollment", enrollment);
