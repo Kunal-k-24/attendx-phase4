@@ -38,12 +38,7 @@ public class QRDisplayActivity extends AppCompatActivity {
 
         startQRRefresh();
 
-        btnSubmitAttendance.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openSubmitAttendanceScreen();
-            }
-        });
+        btnSubmitAttendance.setOnClickListener(v -> openSubmitAttendanceScreen());
     }
 
     private void startQRRefresh() {

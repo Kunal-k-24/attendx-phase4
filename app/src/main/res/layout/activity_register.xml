@@ -1,73 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="#121212"
-    android:padding="20dp">
+    android:fillViewport="true">
 
-    <EditText
-        android:id="@+id/editTextName"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColorHint="#BB86FC"
-        android:textColor="@color/white"
+        android:orientation="vertical"
         android:gravity="center"
-        android:hint="Full Name" />
+        android:padding="20dp"
+        android:background="#FFFFFF">
 
-    <EditText
-        android:id="@+id/editTextEnrollment"
-        android:layout_width="match_parent"
-        android:textColorHint="#BB86FC"
-        android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:gravity="center"
-        android:hint="Enrollment Number" />
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Student Registration"
+            android:textSize="22sp"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"/>
 
-    <EditText
-        android:id="@+id/editTextCollegeEmail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColorHint="#BB86FC"
-        android:textColor="@color/white"
-        android:gravity="center"
-        android:hint="College Email" />
+        <!-- Full Name -->
+        <EditText
+            android:id="@+id/registerFullName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Full Name"
+            android:padding="12dp"
+            android:background="@drawable/input_field"
+            android:textSize="16sp"
+            android:autofillHints="name"
+            android:inputType="textPersonName"/>
 
-    <EditText
-        android:id="@+id/editTextRollNo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/white"
-        android:textColorHint="#BB86FC"
-        android:hint="Roll Number" />
+        <!-- Enrollment Number -->
+        <EditText
+            android:id="@+id/registerEnrollment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Enrollment Number"
+            android:inputType="number"
+            android:padding="12dp"
+            android:background="@drawable/input_field"
+            android:textSize="16sp"
+            android:autofillHints="username"/>
 
-    <EditText
-        android:id="@+id/editTextPersonalEmail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="@color/white"
-        android:textColorHint="#BB86FC"
-        android:hint="Personal Email" />
+        <!-- College Email -->
+        <EditText
+            android:id="@+id/registerCollegeEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="College Email"
+            android:inputType="textEmailAddress"
+            android:padding="12dp"
+            android:background="@drawable/input_field"
+            android:textSize="16sp"
+            android:autofillHints="emailAddress"/>
 
-    <EditText
-        android:id="@+id/editTextPassword"
-        android:layout_width="match_parent"
-        android:gravity="center"
-        android:textColorHint="#BB86FC"
-        android:textColor="@color/white"
-        android:layout_height="wrap_content"
-        android:hint="Password"
-        android:inputType="textPassword" />
+        <!-- Roll Number -->
+        <EditText
+            android:id="@+id/registerRollNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Roll Number"
+            android:inputType="number"
+            android:padding="12dp"
+            android:background="@drawable/input_field"
+            android:textSize="16sp"
+            android:autofillHints="username"/>
 
-    <Button
-        android:id="@+id/buttonRegister"
-        android:layout_width="match_parent"
-        android:gravity="center"
-        android:textColorHint="#BB86FC"
-        android:layout_height="wrap_content"
-        android:text="Register" />
+        <!-- Personal Email -->
+        <EditText
+            android:id="@+id/registerPersonalEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Personal Email"
+            android:inputType="textEmailAddress"
+            android:padding="12dp"
+            android:background="@drawable/input_field"
+            android:textSize="16sp"
+            android:autofillHints="emailAddress"/>
 
-</LinearLayout>
+        <!-- Password -->
+        <EditText
+            android:id="@+id/registerPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:padding="12dp"
+            android:background="@drawable/input_field"
+            android:textSize="16sp"
+            android:autofillHints="password"/>
+
+        <!-- Register Button -->
+        <Button
+            android:id="@+id/buttonRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="REGISTER"
+            android:textSize="18sp"
+            android:backgroundTint="#007BFF"
+            android:textColor="#FFFFFF"
+            android:padding="12dp"
+            android:layout_marginTop="20dp"/>
+    </LinearLayout>
+</ScrollView>

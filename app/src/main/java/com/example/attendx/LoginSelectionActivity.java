@@ -3,11 +3,11 @@ package com.example.attendx;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class LoginSelectionActivity extends AppCompatActivity {
-    private Button studentLoginButton, teacherLoginButton;
+    private LinearLayout studentLayout, teacherLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,15 +29,16 @@ public class LoginSelectionActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_login_selection);
 
-        studentLoginButton = findViewById(R.id.buttonStudentLogin);
-        teacherLoginButton = findViewById(R.id.buttonTeacherLogin);
+        studentLayout = findViewById(R.id.studentLayout);
+        teacherLayout = findViewById(R.id.teacherLayout);
 
-        studentLoginButton.setOnClickListener(v -> {
+        studentLayout.setOnClickListener(v -> {
             Intent intent = new Intent(LoginSelectionActivity.this, LoginActivity.class);
+            intent.putExtra("userType", "student");
             startActivity(intent);
         });
 
-        teacherLoginButton.setOnClickListener(v -> {
+        teacherLayout.setOnClickListener(v -> {
             Intent intent = new Intent(LoginSelectionActivity.this, TeacherLoginActivity.class);
             startActivity(intent);
         });

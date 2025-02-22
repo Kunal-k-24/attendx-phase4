@@ -2,17 +2,17 @@ package com.example.attendx;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.EditText;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import java.util.List;
-import java.util.Arrays;
 
 import java.util.HashMap;
 
@@ -26,75 +26,69 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register); // Ensure this is the correct XML file
+        setContentView(R.layout.activity_register);
 
         // Initialize Firebase Authentication
         mAuth = FirebaseAuth.getInstance();
+        databaseReference = FirebaseDatabase.getInstance().getReference("Users");
 
-        // Link UI elements correctly
-        nameField = findViewById(R.id.editTextName);
-        enrollmentField = findViewById(R.id.editTextEnrollment);
-        collegeEmailField = findViewById(R.id.editTextCollegeEmail);
-        rollField = findViewById(R.id.editTextRollNo); // FIXED: Changed to match XML
-        personalEmailField = findViewById(R.id.editTextPersonalEmail);
-        passwordField = findViewById(R.id.editTextPassword);
+        // Link UI elements
+        nameField = findViewById(R.id.registerFullName);
+        enrollmentField = findViewById(R.id.registerEnrollment);
+        collegeEmailField = findViewById(R.id.registerCollegeEmail);
+        rollField = findViewById(R.id.registerRollNo);
+        personalEmailField = findViewById(R.id.registerPersonalEmail);
+        passwordField = findViewById(R.id.registerPassword);
         registerButton = findViewById(R.id.buttonRegister);
 
         // Register Button Click Event
-        registerButton.setOnClickListener(v -> {
-            String name = nameField.getText().toString().trim();
-            String enrollment = enrollmentField.getText().toString().trim();
-            String collegeEmail = collegeEmailField.getText().toString().trim();
-            String rollNumber = rollField.getText().toString().trim();
-            String personalEmail = personalEmailField.getText().toString().trim();
-            String password = passwordField.getText().toString().trim();
-
-            if (name.isEmpty() || enrollment.isEmpty() || collegeEmail.isEmpty() || rollNumber.isEmpty() || personalEmail.isEmpty() || password.isEmpty()) {
-                Toast.makeText(RegisterActivity.this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
-            } else {
-                registerUser(name, enrollment, collegeEmail, rollNumber, personalEmail, password);
-            }
-        });
+        registerButton.setOnClickListener(v -> registerUser());
     }
 
-    private void registerUser(String name, String enrollment, String collegeEmail, String rollNumber, String personalEmail, String password) {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+    private void registerUser() {
+        String name = nameField.getText().toString().trim();
+        String enrollment = enrollmentField.getText().toString().trim();
+        String collegeEmail = collegeEmailField.getText().toString().trim();
+        String rollNumber = rollField.getText().toString().trim();
+        String personalEmail = personalEmailField.getText().toString().trim();
+        String password = passwordField.getText().toString().trim();
 
-        auth.createUserWithEmailAndPassword(collegeEmail, password).addOnCompleteListener(task -> {
+        // Validate Input Fields
+        if (name.isEmpty() || enrollment.isEmpty() || collegeEmail.isEmpty() ||
+                rollNumber.isEmpty() || personalEmail.isEmpty() || password.isEmpty()) {
+            Toast.makeText(RegisterActivity.this, "Please fill all fields!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Firebase Authentication - Create User
+        mAuth.createUserWithEmailAndPassword(collegeEmail, password).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
-                String userId = auth.getCurrentUser().getUid();
+                FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                if (firebaseUser != null) {
+                    String userId = firebaseUser.getUid();
 
-                // Check if email belongs to a teacher
-                List<String> allowedTeacherEmails = Arrays.asList(
-                        "teacher1@college.edu",
-                        "teacher2@college.edu"
-                );
-                String role = allowedTeacherEmails.contains(collegeEmail) ? "teacher" : "student";
+                    // Save user data to Firebase Database
+                    HashMap<String, Object> userMap = new HashMap<>();
+                    userMap.put("name", name);
+                    userMap.put("enrollment", enrollment);
+                    userMap.put("collegeEmail", collegeEmail);
+                    userMap.put("rollNumber", rollNumber);
+                    userMap.put("personalEmail", personalEmail);
+                    userMap.put("role", "student");  // Only students can register
 
-                // Save user data with role
-                HashMap<String, Object> userMap = new HashMap<>();
-                userMap.put("name", name);
-                userMap.put("enrollment", enrollment);
-                userMap.put("collegeEmail", collegeEmail);
-                userMap.put("rollNumber", rollNumber);
-                userMap.put("personalEmail", personalEmail);
-                userMap.put("role", role);  // Store role
-
-                databaseReference.child(userId).setValue(userMap).addOnCompleteListener(saveTask -> {
-                    if (saveTask.isSuccessful()) {
-                        Toast.makeText(RegisterActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                        finish();
-                    } else {
-                        Toast.makeText(RegisterActivity.this, "Failed to save user data!", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                    databaseReference.child(userId).setValue(userMap).addOnCompleteListener(saveTask -> {
+                        if (saveTask.isSuccessful()) {
+                            Toast.makeText(RegisterActivity.this, "Registration Successful!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(RegisterActivity.this, "Failed to save user data!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             } else {
                 Toast.makeText(RegisterActivity.this, "Registration Failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
-
-
 }
