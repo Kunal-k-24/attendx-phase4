@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,16 +27,16 @@ public class LoginActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private SharedPreferences sharedPreferences;
 
-    private static final String PREFS_NAME = "LoginPrefs";
-    private static final String KEY_REMEMBER_USER = "rememberUser";
+    private static final String PREFS_NAME = "AttendX_Prefs";
     private static final String KEY_USER_ID = "userId";
+    private static final String KEY_USER_ROLE = "userRole";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Initialize Firebase Auth
+        // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
 
@@ -50,10 +49,11 @@ public class LoginActivity extends AppCompatActivity {
         buttonLogin = findViewById(R.id.buttonLogin);
         registerOption = findViewById(R.id.registerOption);
 
-        // Auto-login if user session is stored
+        // Auto-login if session exists
         String savedUserId = sharedPreferences.getString(KEY_USER_ID, null);
-        if (savedUserId != null) {
-            navigateToDashboard(savedUserId);
+        String savedUserRole = sharedPreferences.getString(KEY_USER_ROLE, null);
+        if (savedUserId != null && savedUserRole != null) {
+            navigateToDashboard(savedUserRole);
         }
 
         // Login Button Click Listener
@@ -80,37 +80,40 @@ public class LoginActivity extends AppCompatActivity {
             if (task.isSuccessful()) {
                 String userId = mAuth.getCurrentUser().getUid();
 
-                // Save login session
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(KEY_USER_ID, userId);
-                editor.apply();
+                // Fetch role from Firebase
+                databaseReference.child(userId).child("role").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            String role = snapshot.getValue(String.class);
 
-                navigateToDashboard(userId);
+                            // Save session
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putString(KEY_USER_ID, userId);
+                            editor.putString(KEY_USER_ROLE, role);
+                            editor.apply();
+
+                            navigateToDashboard(role);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(LoginActivity.this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             } else {
                 Toast.makeText(LoginActivity.this, "Login Failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void navigateToDashboard(String userId) {
-        databaseReference.child(userId).child("role").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    String role = snapshot.getValue(String.class);
-                    if ("teacher".equals(role)) {
-                        startActivity(new Intent(LoginActivity.this, TeacherDashboardActivity.class));
-                    } else {
-                        startActivity(new Intent(LoginActivity.this, StudentDashboardActivity.class));
-                    }
-                    finish(); // Close LoginActivity after login
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(LoginActivity.this, "Database error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void navigateToDashboard(String role) {
+        if ("teacher".equals(role)) {
+            startActivity(new Intent(LoginActivity.this, TeacherDashboardActivity.class));
+        } else {
+            startActivity(new Intent(LoginActivity.this, StudentDashboardActivity.class));
+        }
+        finish(); // Close LoginActivity
     }
 }
